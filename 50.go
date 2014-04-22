@@ -10,17 +10,16 @@ import (
 func Cbrt(x complex128) complex128 {
 	z := complex128(1)
 
-	for i := 0; true; i++ {
+	for {
 		pz := z
 
-		// failed
+		// http://tour.golang.org/#50
 		// z = z - (z * z * z - x) / 3 * (z * z)
-
-		// correct
+		
+		// Here is correct?
 		z = (2 * z + x / (z * z)) / 3.0
 
-		if cmplx.Abs(pz - z) < 0.00000001 {
-			// fmt.Println(i, ": ", z)
+		if cmplx.Abs(pz - z) < 1e-10 {
 			break
 		}
 	}
