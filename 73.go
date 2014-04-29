@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 )
 
 type Fetcher interface {
@@ -14,7 +15,6 @@ type Fetcher interface {
 // Crawl uses fetcher to recursively crawl
 // pages starting with url, to a maximum of depth.
 func Crawl(url string, depth int, fetcher Fetcher) {
-	// TODO: Fetch URLs in parallel.
 	// TODO: Don't fetch the same URL twice.
 	// This implementation doesn't do either
 	if depth <= 0 {
@@ -26,10 +26,17 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 		return
 	}
 	fmt.Printf("found: %s %q\n", url, body)
+	
+	// Fetch URLs in parallel.
+	var wg sync.WaitGroup
 	for _, u := range urls {
-		Crawl(u, depth - 1, fetcher)
+		wg.Add(1)
+		go func(u string) {
+			defer wg.Done()
+			Crawl(u, depth - 1, fetcher)
+		}(u)
 	}
-	return
+	wg.Wait()
 }
 
 func main() {
